@@ -516,6 +516,65 @@
       .tx-delete { opacity: 1; }
     }
 
+    /* ─── Today Summary Card ────────────────────────────────────────── */
+    .today-summary {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .today-label {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-right: 16px;
+    }
+    .today-stat {
+      flex: 1;
+      text-align: center;
+    }
+    .today-stat-num {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 2px;
+    }
+    .today-stat-num.income { color: var(--success); }
+    .today-stat-num.expense { color: var(--danger); }
+    .today-stat-hint {
+      font-size: 11px;
+      color: var(--meta);
+    }
+    .today-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--border-soft);
+    }
+
+    /* ─── Section Label ─────────────────────────────────────────────── */
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 20px 0 8px;
+    }
+
+    /* ─── Record Form Wrapper ───────────────────────────────────────── */
+    .record-form {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 4px;
+    }
+
     /* ─── Responsive ──────────────────────────────────────────────── */
     @media (max-width: 380px) {
       .category-grid { grid-template-columns: repeat(3, 1fr); }
@@ -604,15 +663,6 @@
         </svg>
       );
     }
-    function IconRecord({ active }) {
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke={active ? 'var(--accent)' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <line x1="12" y1="8" x2="12" y2="16"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
-        </svg>
-      );
-    }
     function IconSummary({ active }) {
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke={active ? 'var(--accent)' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -622,11 +672,30 @@
         </svg>
       );
     }
+    function IconRecord({ active }) {
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke={active ? 'var(--accent)' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      );
+    }
+    function IconYear({ active }) {
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke={active ? 'var(--accent)' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      );
+    }
 
     /* ─── Overview Page ─────────────────────────────────────────────── */
     function OverviewPage({ transactions, onDelete }) {
       const now = new Date();
       const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const todayKey = todayStr();
 
       const monthTx = useMemo(() =>
         transactions.filter(t => getMonthKey(t.date) === monthKey),
@@ -636,6 +705,13 @@
       const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
       const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
       const balance = income - expense;
+
+      const todayTx = useMemo(() =>
+        transactions.filter(t => t.date === todayKey),
+        [transactions, todayKey]
+      );
+      const todayIncome = todayTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const todayExpense = todayTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
       const recent = useMemo(() =>
         [...transactions].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id).slice(0, 8),
@@ -661,11 +737,24 @@
             </div>
           </div>
 
+          <div className="today-summary">
+            <div className="today-label">今天</div>
+            <div className="today-stat">
+              <div className="today-stat-num income">+¥{fmt(todayIncome)}</div>
+              <div className="today-stat-hint">收入</div>
+            </div>
+            <div className="today-divider" />
+            <div className="today-stat">
+              <div className="today-stat-num expense">−¥{fmt(todayExpense)}</div>
+              <div className="today-stat-hint">支出</div>
+            </div>
+          </div>
+
           <div className="section-title">最近记录</div>
           {recent.length === 0 ? (
             <div className="empty">
               <div className="empty-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 40V10a2 2 0 012-2h20l10 10v22a2 2 0 01-2 2H10a2 2 0 01-2-2z"/><path d="M28 8v10h10"/><path d="M16 24h16M16 30h10"/></svg></div>
-              <div className="empty-text">还没有记录<br/>点击下方「记一笔」开始</div>
+              <div className="empty-text">还没有记录<br/>点击下方「记账」开始</div>
             </div>
           ) : (
             <div>
@@ -868,6 +957,137 @@
       );
     }
 
+    /* ─── Yearly Page ──────────────────────────────────────────────── */
+    function YearlyPage({ transactions }) {
+      const now = new Date();
+      const [viewYear, setViewYear] = useState(now.getFullYear());
+
+      const yearTx = useMemo(() =>
+        transactions.filter(t => {
+          const y = parseInt(t.date.slice(0, 4));
+          return y === viewYear;
+        }),
+        [transactions, viewYear]
+      );
+
+      const income = yearTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = yearTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      const count = yearTx.length;
+
+      // Monthly breakdown for the year
+      const monthBreakdown = useMemo(() => {
+        const months = Array.from({ length: 12 }, (_, i) => {
+          const key = `${viewYear}-${String(i + 1).padStart(2, '0')}`;
+          const tx = yearTx.filter(t => getMonthKey(t.date) === key);
+          return {
+            month: i + 1,
+            label: `${i + 1}月`,
+            income: tx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0),
+            expense: tx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0),
+            count: tx.length,
+          };
+        });
+        return months;
+      }, [yearTx, viewYear]);
+
+      const maxMonthExpense = Math.max(...monthBreakdown.map(m => m.expense), 1);
+
+      // Category breakdown for the year
+      const catBreakdown = useMemo(() => {
+        const map = {};
+        yearTx.filter(t => t.type === 'expense').forEach(t => {
+          map[t.category] = (map[t.category] || 0) + t.amount;
+        });
+        return Object.entries(map)
+          .map(([id, amount]) => ({ ...CAT_MAP[id], amount }))
+          .sort((a, b) => b.amount - a.amount);
+      }, [yearTx]);
+
+      const maxCatAmount = catBreakdown.length > 0 ? catBreakdown[0].amount : 1;
+
+      const activeMonths = monthBreakdown.filter(m => m.count > 0);
+
+      return (
+        <div>
+          <div className="month-nav">
+            <button type="button" aria-label="上一年" onClick={() => setViewYear(y => y - 1)}>‹</button>
+            <span className="month-label" aria-live="polite">{viewYear}年</span>
+            <button type="button" aria-label="下一年" onClick={() => setViewYear(y => y + 1)}>›</button>
+          </div>
+
+          <div className="summary-stat-grid">
+            <div className="summary-stat">
+              <div className="label">收入</div>
+              <div className="value" style={{ color: 'var(--success)' }}>¥{fmt(income)}</div>
+            </div>
+            <div className="summary-stat">
+              <div className="label">支出</div>
+              <div className="value" style={{ color: 'var(--danger)' }}>¥{fmt(expense)}</div>
+            </div>
+            <div className="summary-stat">
+              <div className="label">结余</div>
+              <div className="value">¥{fmt(income - expense)}</div>
+            </div>
+            <div className="summary-stat">
+              <div className="label">笔数</div>
+              <div className="value">{count}</div>
+            </div>
+          </div>
+
+          <div className="section-title">月度分布</div>
+          {activeMonths.length === 0 ? (
+            <div className="empty">
+              <div className="empty-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 40V10a2 2 0 012-2h20l10 10v22a2 2 0 01-2 2H10a2 2 0 01-2-2z"/><path d="M28 8v10h10"/><path d="M16 24h16M16 30h10"/></svg></div>
+              <div className="empty-text">{viewYear}年暂无记录</div>
+            </div>
+          ) : (
+            <div className="card" style={{ padding: '4px 20px' }}>
+              {monthBreakdown.map(m => {
+                if (m.count === 0) return null;
+                return (
+                  <div className="cat-bar-row" key={m.month}>
+                    <div className="cat-bar-icon" style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', width: 32, textAlign: 'center' }}>
+                      {m.month}月
+                    </div>
+                    <div className="cat-bar-info">
+                      <div className="cat-bar-name">{m.count} 笔 · 支出 ¥{fmt(m.expense)}{m.income > 0 ? ` · 收入 ¥${fmt(m.income)}` : ''}</div>
+                      <div className="cat-bar-track">
+                        <div className="cat-bar-fill" style={{ width: `${(m.expense / maxMonthExpense) * 100}%` }} />
+                      </div>
+                    </div>
+                    <div className="cat-bar-amount">¥{fmt(m.expense)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="section-title">年度支出分类</div>
+          {catBreakdown.length === 0 ? (
+            <div className="empty">
+              <div className="empty-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 40V20"/><path d="M18 40V10"/><path d="M28 40V16"/><path d="M38 40V6"/></svg></div>
+              <div className="empty-text">暂无支出记录</div>
+            </div>
+          ) : (
+            <div className="card" style={{ padding: '4px 20px' }}>
+              {catBreakdown.map(cat => (
+                <div className="cat-bar-row" key={cat.id}>
+                  <div className="cat-bar-icon">{cat.icon}</div>
+                  <div className="cat-bar-info">
+                    <div className="cat-bar-name">{cat.label}</div>
+                    <div className="cat-bar-track">
+                      <div className="cat-bar-fill" style={{ width: `${(cat.amount / maxCatAmount) * 100}%` }} />
+                    </div>
+                  </div>
+                  <div className="cat-bar-amount">¥{fmt(cat.amount)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     /* ─── App Shell ────────────────────────────────────────────────── */
     function App() {
       const [tab, setTab] = useState('overview');
@@ -884,7 +1104,8 @@
         showToast('已删除');
       }, []);
 
-      const headerTitle = tab === 'overview' ? '记账本' : tab === 'record' ? '记一笔' : '汇总';
+      const headerTitles = { overview: '记账本', record: '记一笔', summary: '月度', yearly: '年度' };
+      const headerTitle = headerTitles[tab];
 
       return (
         <React.Fragment>
@@ -902,6 +1123,9 @@
             <div role="tabpanel" className={`page ${tab === 'summary' ? 'active' : ''}`}>
               <SummaryPage transactions={transactions} />
             </div>
+            <div role="tabpanel" className={`page ${tab === 'yearly' ? 'active' : ''}`}>
+              <YearlyPage transactions={transactions} />
+            </div>
           </div>
 
           <nav className="tab-bar" role="tablist" aria-label="主导航">
@@ -911,11 +1135,15 @@
             </button>
             <button role="tab" aria-selected={tab === 'record'} className={`tab-item ${tab === 'record' ? 'active' : ''}`} onClick={() => setTab('record')}>
               <IconRecord active={tab === 'record'} />
-              <span>记一笔</span>
+              <span>记账</span>
             </button>
             <button role="tab" aria-selected={tab === 'summary'} className={`tab-item ${tab === 'summary' ? 'active' : ''}`} onClick={() => setTab('summary')}>
               <IconSummary active={tab === 'summary'} />
-              <span>汇总</span>
+              <span>月度</span>
+            </button>
+            <button role="tab" aria-selected={tab === 'yearly'} className={`tab-item ${tab === 'yearly' ? 'active' : ''}`} onClick={() => setTab('yearly')}>
+              <IconYear active={tab === 'yearly'} />
+              <span>年度</span>
             </button>
           </nav>
         </React.Fragment>
