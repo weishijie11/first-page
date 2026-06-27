@@ -9,8 +9,8 @@
   "theme_color": "#fafafa",
   "icons": [
     {
-      "src": "app-icon.png",
-      "sizes": "1070x1026",
+      "src": "icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
