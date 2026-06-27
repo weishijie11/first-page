@@ -418,6 +418,70 @@
     }
     .custom-cat-input::placeholder { color: var(--meta); }
 
+    /* ─── Icon Picker (for custom category) ────────────────────────── */
+    .icon-picker-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+      margin-bottom: 6px;
+    }
+    .icon-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .icon-pick-btn {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 2px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .icon-pick-btn:hover { border-color: var(--accent); transform: scale(1.08); }
+    .icon-pick-btn.active {
+      border-color: var(--accent);
+      background: color-mix(in oklab, var(--accent), transparent 90%);
+      box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent), transparent 80%);
+    }
+    @media (max-width: 380px) {
+      .icon-picker-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    /* ─── Line Chart ──────────────────────────────────────────────── */
+    .line-chart-wrap {
+      padding: 8px 0;
+    }
+    .line-chart-wrap svg {
+      display: block;
+      width: 100%;
+    }
+    .line-legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 8px;
+    }
+    .line-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--fg-2);
+    }
+    .line-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
     /* ─── Summary Page ────────────────────────────────────────────── */
     .month-nav {
       display: flex;
@@ -786,6 +850,7 @@
       return cat ? cat.label : tx.category;
     }
     function catIcon(tx) {
+      if (tx.customIcon) return tx.customIcon;
       const cat = CAT_MAP[tx.category];
       return cat ? cat.icon : '📦';
     }
@@ -1003,6 +1068,130 @@
       );
     }
 
+    /* ─── LineChart ─────────────────────────────────────────────────── */
+    function LineChart({ data }) {
+      const PAD = { left: 44, right: 16, top: 16, bottom: 32 };
+      const W = 360, H = 200;
+      const plotW = W - PAD.left - PAD.right;
+      const plotH = H - PAD.top - PAD.bottom;
+
+      if (!data.length) {
+        return (
+          <div className="line-chart-wrap">
+            <div className="empty" style={{ padding: '24px 0' }}>
+              <div className="empty-text">暂无数据</div>
+            </div>
+          </div>
+        );
+      }
+
+      const maxVal = Math.max(
+        ...data.map(d => Math.max(d.expense, d.income)),
+        1
+      );
+      // Round up to a nice number
+      const niceMax = Math.ceil(maxVal / (maxVal > 1000 ? 1000 : 100)) * (maxVal > 1000 ? 1000 : 100);
+      const ticks = 4;
+      const tickStep = niceMax / ticks;
+
+      function xPos(i) { return PAD.left + (i / (data.length - 1 || 1)) * plotW; }
+      function yPos(v) { return PAD.top + plotH - (v / niceMax) * plotH; }
+
+      const expensePoints = data.map((d, i) => `${xPos(i)},${yPos(d.expense)}`).join(' ');
+      const incomePoints = data.map((d, i) => `${xPos(i)},${yPos(d.income)}`).join(' ');
+
+      // Build area fills (polygon: line + bottom edge)
+      function areaPoints(linePoints, dataKey) {
+        const pts = data.map((d, i) => `${xPos(i)},${yPos(d[dataKey])}`).join(' ');
+        const bottom = `${xPos(data.length - 1)},${yPos(0)} ${xPos(0)},${yPos(0)}`;
+        return `${pts} ${bottom}`;
+      }
+
+      function fmtY(v) {
+        if (v >= 10000) return (v / 10000).toFixed(1) + 'w';
+        if (v >= 1000) return (v / 1000).toFixed(1) + 'k';
+        return v;
+      }
+
+      return (
+        <div className="line-chart-wrap">
+          <svg viewBox={`0 0 ${W} ${H}`}>
+            {/* Grid lines + Y labels */}
+            {Array.from({ length: ticks + 1 }, (_, i) => {
+              const val = tickStep * i;
+              const y = yPos(val);
+              return (
+                <g key={i}>
+                  <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y}
+                    stroke="var(--border-soft)" strokeWidth="1" strokeDasharray={i === 0 ? 'none' : '4 4'} />
+                  <text x={PAD.left - 8} y={y + 4} textAnchor="end" fontSize="10" fill="var(--meta)">
+                    {fmtY(val)}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Expense area fill */}
+            <polygon
+              points={areaPoints(expensePoints, 'expense')}
+              fill="var(--danger)"
+              opacity="0.08"
+            />
+            {/* Income area fill */}
+            <polygon
+              points={areaPoints(incomePoints, 'income')}
+              fill="var(--success)"
+              opacity="0.08"
+            />
+
+            {/* Grid vertical lines */}
+            {data.map((_, i) => (
+              <line key={i} x1={xPos(i)} y1={PAD.top} x2={xPos(i)} y2={H - PAD.bottom}
+                stroke="var(--border-soft)" strokeWidth="1" strokeDasharray="2 4" />
+            ))}
+
+            {/* Expense line */}
+            <polyline points={expensePoints} fill="none" stroke="var(--danger)"
+              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            {/* Income line */}
+            <polyline points={incomePoints} fill="none" stroke="var(--success)"
+              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+
+            {/* Data dots */}
+            {data.map((d, i) => (
+              <React.Fragment key={i}>
+                {d.expense > 0 && (
+                  <circle cx={xPos(i)} cy={yPos(d.expense)} r="4" fill="#fff" stroke="var(--danger)" strokeWidth="2.5" />
+                )}
+                {d.income > 0 && (
+                  <circle cx={xPos(i)} cy={yPos(d.income)} r="4" fill="#fff" stroke="var(--success)" strokeWidth="2.5" />
+                )}
+              </React.Fragment>
+            ))}
+
+            {/* X-axis labels */}
+            {data.map((d, i) => (
+              <text key={i} x={xPos(i)} y={H - 8} textAnchor="middle" fontSize="10"
+                fill={d.count > 0 ? 'var(--muted)' : 'var(--meta)'}>
+                {d.label}
+              </text>
+            ))}
+          </svg>
+
+          <div className="line-legend">
+            <div className="line-legend-item">
+              <span className="line-legend-dot" style={{ background: 'var(--danger)' }} />
+              支出
+            </div>
+            <div className="line-legend-item">
+              <span className="line-legend-dot" style={{ background: 'var(--success)' }} />
+              收入
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     /* ─── Overview Page ─────────────────────────────────────────────── */
     function OverviewPage({ transactions, onEdit, onDelete }) {
       const now = new Date();
@@ -1099,12 +1288,25 @@
     }
 
     /* ─── Record Page ──────────────────────────────────────────────── */
+    // Custom icon options for the picker
+    const CUSTOM_ICONS = [
+      '🛒','🎮','🏥','📱','🚗','⛽','🎓',
+      '💄','👶','🐶','🎵','🏃','🎂','🎁',
+      '🌸','💻','📷','🎨','✂️','🧹','🔧',
+      '🎫','💊','🍺','☕','🏋️','🎣','🎲',
+      '🎸','📚','✈️','🚲','🎯','🧸','🎪',
+      '🌿','🎭','🔑','🛡️','🎻','🎾','🏄',
+    ];
+
     function RecordPage({ editTx, onAdd, onUpdate, onCancelEdit }) {
       const [type, setType] = useState(editTx ? editTx.type : 'expense');
       const [amount, setAmount] = useState(editTx ? String(editTx.amount) : '');
       const [category, setCategory] = useState(editTx ? editTx.category : 'food');
       const [customCategory, setCustomCategory] = useState(
         editTx && editTx.customCategory ? editTx.customCategory : ''
+      );
+      const [customIcon, setCustomIcon] = useState(
+        editTx && editTx.customIcon ? editTx.customIcon : ''
       );
       const [note, setNote] = useState(editTx ? (editTx.note || '') : '');
       const [date, setDate] = useState(editTx ? editTx.date : todayStr());
@@ -1118,6 +1320,7 @@
         if (!isEditing) {
           setCategory(type === 'expense' ? 'food' : 'salary');
           setCustomCategory('');
+          setCustomIcon('');
         }
       }, [type, isEditing]);
 
@@ -1139,6 +1342,7 @@
           note,
           date,
           ...(isCustom && customCategory.trim() ? { customCategory: customCategory.trim() } : {}),
+          ...(isCustom && customIcon ? { customIcon } : {}),
         };
         if (isEditing) {
           onUpdate({ ...editTx, ...txData });
@@ -1148,6 +1352,7 @@
           setAmount('');
           setNote('');
           setCustomCategory('');
+          setCustomIcon('');
           showToast(type === 'expense' ? '支出已记录' : '收入已记录');
         }
       }
@@ -1159,6 +1364,7 @@
           setAmount('');
           setNote('');
           setCustomCategory('');
+          setCustomIcon('');
         }
       }
 
@@ -1231,15 +1437,31 @@
               ))}
             </div>
             {isCustom && (
-              <input
-                type="text"
-                className="custom-cat-input"
-                placeholder="输入自定义分类名称…"
-                value={customCategory}
-                onChange={e => setCustomCategory(e.target.value)}
-                maxLength={10}
-                autoFocus
-              />
+              <div>
+                <input
+                  type="text"
+                  className="custom-cat-input"
+                  placeholder="输入自定义分类名称…"
+                  value={customCategory}
+                  onChange={e => setCustomCategory(e.target.value)}
+                  maxLength={10}
+                  autoFocus
+                />
+                <div className="icon-picker-label">选择图标（可选）</div>
+                <div className="icon-picker-grid">
+                  {CUSTOM_ICONS.map(icon => (
+                    <button
+                      type="button"
+                      key={icon}
+                      className={`icon-pick-btn ${customIcon === icon ? 'active' : ''}`}
+                      onClick={() => setCustomIcon(customIcon === icon ? '' : icon)}
+                      aria-label={`选择图标 ${icon}`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
@@ -1392,8 +1614,6 @@
         return months;
       }, [yearTx, viewYear]);
 
-      const maxMonthExpense = Math.max(...monthBreakdown.map(m => m.expense), 1);
-
       // Category breakdown for expenses (pie chart)
       const expBreakdown = useMemo(() => {
         const map = {};
@@ -1454,24 +1674,8 @@
               <div className="empty-text">{viewYear}年暂无记录</div>
             </div>
           ) : (
-            <div className="card" style={{ padding: '4px 20px' }}>
-              {monthBreakdown.map(m => {
-                if (m.count === 0) return null;
-                return (
-                  <div className="cat-bar-row" key={m.month}>
-                    <div className="cat-bar-icon" style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', width: 32, textAlign: 'center' }}>
-                      {m.month}月
-                    </div>
-                    <div className="cat-bar-info">
-                      <div className="cat-bar-name">{m.count} 笔 · 支出 ¥{fmt(m.expense)}{m.income > 0 ? ` · 收入 ¥${fmt(m.income)}` : ''}</div>
-                      <div className="cat-bar-track">
-                        <div className="cat-bar-fill" style={{ width: `${(m.expense / maxMonthExpense) * 100}%` }} />
-                      </div>
-                    </div>
-                    <div className="cat-bar-amount">¥{fmt(m.expense)}</div>
-                  </div>
-                );
-              })}
+            <div className="card" style={{ padding: '12px 8px' }}>
+              <LineChart data={monthBreakdown} />
             </div>
           )}
 
