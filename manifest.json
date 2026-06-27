@@ -1,6 +1,6 @@
 {
-  "name": "记账本",
-  "short_name": "记账本",
+  "name": "小猪账本",
+  "short_name": "小猪账本",
   "description": "简洁好用的个人记账应用",
   "start_url": "/",
   "display": "standalone",
@@ -9,9 +9,9 @@
   "theme_color": "#fafafa",
   "icons": [
     {
-      "src": "favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "app-icon.png",
+      "sizes": "1070x1026",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

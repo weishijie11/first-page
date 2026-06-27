@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>记账本</title>
+  <title>小猪账本</title>
 
   <!-- iOS 添加到主屏幕 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="记账本" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="apple-touch-icon" href="favicon.svg" />
+  <meta name="apple-mobile-web-app-title" content="小猪账本" />
+  <link rel="icon" type="image/png" href="app-icon.png" />
+  <link rel="apple-touch-icon" href="app-icon.png" />
 
   <!-- Android / PWA -->
   <link rel="manifest" href="manifest.json" />
@@ -1758,7 +1758,7 @@
         setTab('overview');
       }, []);
 
-      const headerTitles = { overview: '记账本', record: '记一笔', summary: '月度', yearly: '年度' };
+      const headerTitles = { overview: '小猪账本', record: '记一笔', summary: '月度', yearly: '年度' };
       const headerTitle = headerTitles[tab];
 
       return (
