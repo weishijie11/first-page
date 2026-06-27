@@ -2,8 +2,20 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>记账本</title>
+
+  <!-- iOS 添加到主屏幕 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="记账本" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+
+  <!-- Android / PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#fafafa" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <style>
     /* ─── Apple Design System Tokens ──────────────────────────────── */
     :root {
@@ -41,6 +53,20 @@
       line-height: 1.47;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      /* 禁止双指缩放 + 双击缩放 */
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      /* 禁止 iOS 长按弹出菜单 */
+      -webkit-touch-callout: none;
+      /* 禁止页面下拉回弹（保持跟手） */
+      overscroll-behavior: none;
+    }
+    /* 输入框允许正常选中和系统行为 */
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+      -webkit-touch-callout: default;
     }
 
     /* ─── Layout Shell ────────────────────────────────────────────── */
