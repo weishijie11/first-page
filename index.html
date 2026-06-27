@@ -210,18 +210,18 @@
     .tx-icon.income-icon { background: color-mix(in oklab, var(--success), transparent 88%); }
     .tx-icon.expense-icon { background: color-mix(in oklab, var(--danger), transparent 90%); }
     .tx-info { flex: 1; min-width: 0; }
-    .tx-category {
+    .tx-primary {
       font-size: 15px;
       font-weight: 500;
       color: var(--fg);
-    }
-    .tx-note {
-      font-size: 13px;
-      color: var(--meta);
-      margin-top: 1px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .tx-secondary {
+      font-size: 12px;
+      color: var(--meta);
+      margin-top: 2px;
     }
     .tx-amount {
       font-family: var(--font-mono);
@@ -233,6 +233,47 @@
     }
     .tx-amount.income { color: var(--success); }
     .tx-amount.expense { color: var(--fg); }
+
+    /* ─── Swipeable Row ──────────────────────────────────────────── */
+    .swipe-container {
+      position: relative;
+      overflow: hidden;
+    }
+    .swipe-actions {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      align-items: stretch;
+      z-index: 0;
+    }
+    .swipe-action-btn {
+      width: 64px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .swipe-action-btn.edit-btn {
+      background: var(--accent);
+    }
+    .swipe-action-btn.delete-btn {
+      background: var(--danger);
+    }
+    .swipe-content {
+      position: relative;
+      z-index: 1;
+      background: var(--bg);
+      transition: transform 0.3s cubic-bezier(0.28,0,0.22,1);
+    }
 
     /* ─── Record Form ─────────────────────────────────────────────── */
     .type-toggle {
@@ -309,7 +350,7 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      padding: 12px 4px;
+      padding: 10px 4px;
       border: 1px solid var(--border-soft);
       border-radius: var(--radius-md);
       background: var(--bg);
@@ -344,6 +385,38 @@
     }
     .submit-btn:hover { background: var(--accent-hover); }
     .submit-btn:active { background: var(--accent-active); transform: scale(0.98); }
+    .cancel-edit-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--bg);
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cancel-edit-btn:hover { background: var(--surface); }
+
+    .custom-cat-input {
+      margin-top: 10px;
+      padding: 10px 14px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--fg);
+      background: var(--bg);
+      outline: none;
+      width: 100%;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .custom-cat-input::placeholder { color: var(--meta); }
 
     /* ─── Summary Page ────────────────────────────────────────────── */
     .month-nav {
@@ -400,7 +473,62 @@
       letter-spacing: -0.01em;
     }
 
-    /* Category bar */
+    /* ─── Donut Chart ────────────────────────────────────────────── */
+    .donut-chart-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+    }
+    .donut-chart-wrap svg {
+      display: block;
+    }
+    .donut-center-text {
+      font-family: var(--font-display);
+      font-size: 13px;
+      fill: var(--muted);
+    }
+    .donut-center-amount {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      fill: var(--fg);
+    }
+    .chart-legend {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 16px;
+      margin-top: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--fg-2);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .legend-label {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .legend-pct {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--meta);
+      flex-shrink: 0;
+    }
+
+    /* Category bar (kept for yearly month breakdown) */
     .cat-bar-row {
       display: flex;
       align-items: center;
@@ -492,30 +620,6 @@
       opacity: 1;
     }
 
-    /* ─── Delete Button ───────────────────────────────────────────── */
-    .tx-delete {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: none;
-      background: transparent;
-      color: var(--meta);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 8px;
-      font-size: 14px;
-      transition: all 0.15s;
-      flex-shrink: 0;
-      opacity: 0;
-    }
-    .tx-row:hover .tx-delete { opacity: 1; }
-    .tx-delete:hover { background: color-mix(in oklab, var(--danger), transparent 90%); color: var(--danger); }
-    @media (hover: none) {
-      .tx-delete { opacity: 1; }
-    }
-
     /* ─── Today Summary Card ────────────────────────────────────────── */
     .today-summary {
       display: flex;
@@ -579,6 +683,7 @@
     @media (max-width: 380px) {
       .category-grid { grid-template-columns: repeat(3, 1fr); }
       .balance-amount { font-size: 34px; }
+      .chart-legend { grid-template-columns: 1fr; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -599,7 +704,7 @@
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useCallback } = React;
+    const { useState, useEffect, useMemo, useCallback, useRef } = React;
 
     /* ─── Constants ─────────────────────────────────────────────────── */
     const EXPENSE_CATS = [
@@ -610,19 +715,42 @@
       { id: 'housing', icon: '🏠', label: '住房' },
       { id: 'medical', icon: '💊', label: '医疗' },
       { id: 'education', icon: '📚', label: '教育' },
+      { id: 'loan', icon: '🏦', label: '贷款' },
+      { id: 'communication', icon: '📱', label: '通讯' },
+      { id: 'clothing', icon: '👔', label: '服饰' },
+      { id: 'home', icon: '🛋️', label: '居家' },
+      { id: 'travel', icon: '✈️', label: '出行' },
+      { id: 'social', icon: '🎁', label: '人情' },
+      { id: 'smoke', icon: '🍷', label: '烟酒' },
+      { id: 'pet', icon: '🐱', label: '宠物' },
       { id: 'other-exp', icon: '📦', label: '其他' },
     ];
     const INCOME_CATS = [
       { id: 'salary', icon: '💰', label: '工资' },
-      { id: 'bonus', icon: '🎁', label: '奖金' },
+      { id: 'bonus', icon: '🎊', label: '奖金' },
       { id: 'invest', icon: '📈', label: '投资' },
       { id: 'freelance', icon: '💻', label: '兼职' },
       { id: 'refund', icon: '↩️', label: '退款' },
       { id: 'gift', icon: '🧧', label: '红包' },
+      { id: 'finance', icon: '📊', label: '理财' },
+      { id: 'reimburse', icon: '🧾', label: '报销' },
+      { id: 'business', icon: '🏪', label: '经营' },
       { id: 'other-inc', icon: '💵', label: '其他' },
     ];
     const ALL_CATS = [...EXPENSE_CATS, ...INCOME_CATS];
     const CAT_MAP = Object.fromEntries(ALL_CATS.map(c => [c.id, c]));
+
+    /* ─── Category Colors (for pie chart) ───────────────────────────── */
+    const CAT_COLORS = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD',
+      '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA',
+      '#F1948A', '#C39BD3', '#7FB3D8', '#B0BEC5',
+    ];
+    // Income chart uses a different palette
+    const INC_COLORS = [
+      '#5a7fb5', '#6b9e6b', '#c4a35a', '#8e8e93', '#7FB3D8', '#F1948A',
+      '#98D8C8', '#BB8FCE', '#85C1E9', '#B0BEC5',
+    ];
 
     /* ─── Helpers ───────────────────────────────────────────────────── */
     function loadTx() {
@@ -642,7 +770,7 @@
       return n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
     function getMonthKey(dateStr) {
-      return dateStr.slice(0, 7); // "2026-06"
+      return dateStr.slice(0, 7);
     }
     function getMonthLabel(key) {
       const [y, m] = key.split('-');
@@ -650,6 +778,16 @@
     }
     function todayStr() {
       return new Date().toISOString().slice(0, 10);
+    }
+    // Get display label for a category, supporting custom names
+    function catDisplay(tx) {
+      if (tx.customCategory) return tx.customCategory;
+      const cat = CAT_MAP[tx.category];
+      return cat ? cat.label : tx.category;
+    }
+    function catIcon(tx) {
+      const cat = CAT_MAP[tx.category];
+      return cat ? cat.icon : '📦';
     }
 
     /* ─── Icon Components ───────────────────────────────────────────── */
@@ -691,8 +829,182 @@
       );
     }
 
+    /* ─── SwipeableRow ──────────────────────────────────────────────── */
+    function SwipeableRow({ children, onEdit, onDelete }) {
+      const [swipeX, setSwipeX] = useState(0);
+      const [isOpen, setIsOpen] = useState(false);
+      const startX = useRef(null);
+      const startY = useRef(null);
+      const isDragging = useRef(false);
+      const isOpenRef = useRef(false);
+      const swipeXRef = useRef(0);
+      const ACTION_WIDTH = 128;
+
+      // Sync refs with state so event handlers always read latest values
+      isOpenRef.current = isOpen;
+      swipeXRef.current = swipeX;
+
+      const close = useCallback(() => {
+        setSwipeX(0);
+        setIsOpen(false);
+        startX.current = null;
+        startY.current = null;
+        isDragging.current = false;
+      }, []);
+
+      function handleStart(clientX, clientY) {
+        startX.current = clientX;
+        startY.current = clientY;
+        isDragging.current = false;
+      }
+
+      function handleMove(clientX, clientY) {
+        if (startX.current === null) return;
+        const dx = startX.current - clientX;
+        const dy = Math.abs((startY.current || clientY) - clientY);
+
+        // Only activate horizontal swipe when it dominates vertical
+        if (!isDragging.current && Math.abs(dx) > 8 && Math.abs(dx) > dy) {
+          isDragging.current = true;
+        }
+        if (!isDragging.current) return;
+
+        if (dx > 0) {
+          setSwipeX(Math.min(dx, ACTION_WIDTH));
+        } else if (isOpenRef.current) {
+          setSwipeX(Math.max(ACTION_WIDTH + dx, 0));
+        }
+      }
+
+      function handleEnd() {
+        if (!isDragging.current && !isOpenRef.current) { close(); return; }
+        if (swipeXRef.current > ACTION_WIDTH * 0.35) {
+          setSwipeX(ACTION_WIDTH);
+          setIsOpen(true);
+        } else {
+          close();
+        }
+      }
+
+      // Close on outside tap when open
+      useEffect(() => {
+        if (!isOpen) return;
+        function onTap(e) {
+          if (!e.target.closest('.swipe-container')) close();
+          else if (e.target.closest('.swipe-action-btn')) {
+            setTimeout(close, 100);
+          }
+        }
+        document.addEventListener('touchstart', onTap, { passive: true });
+        document.addEventListener('mousedown', onTap);
+        return () => {
+          document.removeEventListener('touchstart', onTap);
+          document.removeEventListener('mousedown', onTap);
+        };
+      }, [isOpen, close]);
+
+      return (
+        <div className="swipe-container">
+          <div className="swipe-actions" style={{ width: ACTION_WIDTH }}>
+            <button
+              type="button"
+              className="swipe-action-btn edit-btn"
+              aria-label="编辑此记录"
+              onClick={onEdit}
+            >
+              编辑
+            </button>
+            <button
+              type="button"
+              className="swipe-action-btn delete-btn"
+              aria-label="删除此记录"
+              onClick={onDelete}
+            >
+              删除
+            </button>
+          </div>
+          <div
+            className="swipe-content"
+            style={{ transform: `translateX(-${swipeX}px)` }}
+            onTouchStart={e => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
+            onTouchMove={e => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
+            onTouchEnd={handleEnd}
+            onMouseDown={e => handleStart(e.clientX, e.clientY)}
+            onMouseMove={e => { if (isDragging.current) handleMove(e.clientX, e.clientY); }}
+            onMouseUp={handleEnd}
+            onMouseLeave={handleEnd}
+          >
+            {children}
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── DonutChart ────────────────────────────────────────────────── */
+    function DonutChart({ data, total, colors, centerLabel }) {
+      const SIZE = 180;
+      const STROKE = 22;
+      const RADIUS = (SIZE - STROKE) / 2;
+      const CENTER = SIZE / 2;
+      const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+      if (!data.length || total === 0) {
+        return (
+          <div className="donut-chart-wrap">
+            <svg viewBox={`0 0 ${SIZE} ${SIZE}`} width={SIZE} height={SIZE}>
+              <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="var(--surface)" strokeWidth={STROKE} />
+              <text x={CENTER} y={CENTER - 6} textAnchor="middle" className="donut-center-text">暂无数据</text>
+            </svg>
+          </div>
+        );
+      }
+
+      let cumulative = 0;
+      const slices = data.map((item, i) => {
+        const pct = total > 0 ? item.amount / total : 0;
+        const dash = Math.max(pct * CIRCUMFERENCE, pct > 0 ? 2 : 0); // min visible arc
+        const gap = CIRCUMFERENCE - dash;
+        const offset = cumulative;
+        cumulative += dash;
+        return { ...item, dash, gap, offset, color: colors[i % colors.length], pct };
+      });
+
+      return (
+        <div className="donut-chart-wrap">
+          <svg viewBox={`0 0 ${SIZE} ${SIZE}`} width={SIZE} height={SIZE}>
+            {slices.map((s, i) => (
+              <circle
+                key={i}
+                cx={CENTER}
+                cy={CENTER}
+                r={RADIUS}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={STROKE}
+                strokeDasharray={`${s.dash} ${s.gap}`}
+                strokeDashoffset={-s.offset}
+                strokeLinecap="butt"
+                transform={`rotate(-90 ${CENTER} ${CENTER})`}
+              />
+            ))}
+            <text x={CENTER} y={CENTER - 8} textAnchor="middle" className="donut-center-text">{centerLabel || '总支出'}</text>
+            <text x={CENTER} y={CENTER + 16} textAnchor="middle" className="donut-center-amount">¥{fmt(total)}</text>
+          </svg>
+          <div className="chart-legend">
+            {slices.map((s, i) => (
+              <div className="legend-item" key={i}>
+                <span className="legend-dot" style={{ background: s.color }} />
+                <span className="legend-label">{s.label}</span>
+                <span className="legend-pct">{Math.round(s.pct * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     /* ─── Overview Page ─────────────────────────────────────────────── */
-    function OverviewPage({ transactions, onDelete }) {
+    function OverviewPage({ transactions, onEdit, onDelete }) {
       const now = new Date();
       const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const todayKey = todayStr();
@@ -759,20 +1071,24 @@
           ) : (
             <div>
               {recent.map(tx => {
-                const cat = CAT_MAP[tx.category];
+                const noteText = tx.note || catDisplay(tx);
+                const subText = tx.note ? `${catDisplay(tx)} · ${tx.date.slice(5)}` : tx.date.slice(5);
                 return (
-                  <div className="card-white" key={tx.id} style={{ display: 'flex', alignItems: 'center', padding: '14px 20px' }}>
-                    <div className={`tx-icon ${tx.type === 'income' ? 'income-icon' : 'expense-icon'}`}>
-                      {cat?.icon || '📦'}
-                    </div>
-                    <div className="tx-info">
-                      <div className="tx-category">{cat?.label || tx.category}</div>
-                      <div className="tx-note">{tx.note || tx.date}</div>
-                    </div>
-                    <div className={`tx-amount ${tx.type}`}>
-                      {tx.type === 'income' ? '+' : '−'}¥{fmt(tx.amount)}
-                    </div>
-                    <button type="button" className="tx-delete" aria-label="删除此记录" onClick={() => onDelete(tx.id)}>×</button>
+                  <div className="card-white" key={tx.id} style={{ padding: 0, overflow: 'hidden' }}>
+                    <SwipeableRow onEdit={() => onEdit(tx)} onDelete={() => onDelete(tx.id)}>
+                      <div style={{ display: 'flex', alignItems: 'center', padding: '14px 20px' }}>
+                        <div className={`tx-icon ${tx.type === 'income' ? 'income-icon' : 'expense-icon'}`}>
+                          {catIcon(tx)}
+                        </div>
+                        <div className="tx-info">
+                          <div className="tx-primary">{noteText}</div>
+                          <div className="tx-secondary">{subText}</div>
+                        </div>
+                        <div className={`tx-amount ${tx.type}`}>
+                          {tx.type === 'income' ? '+' : '−'}¥{fmt(tx.amount)}
+                        </div>
+                      </div>
+                    </SwipeableRow>
                   </div>
                 );
               })}
@@ -783,14 +1099,27 @@
     }
 
     /* ─── Record Page ──────────────────────────────────────────────── */
-    function RecordPage({ onAdd }) {
-      const [type, setType] = useState('expense');
-      const [amount, setAmount] = useState('');
-      const [category, setCategory] = useState('food');
-      const [note, setNote] = useState('');
-      const [date, setDate] = useState(todayStr());
+    function RecordPage({ editTx, onAdd, onUpdate, onCancelEdit }) {
+      const [type, setType] = useState(editTx ? editTx.type : 'expense');
+      const [amount, setAmount] = useState(editTx ? String(editTx.amount) : '');
+      const [category, setCategory] = useState(editTx ? editTx.category : 'food');
+      const [customCategory, setCustomCategory] = useState(
+        editTx && editTx.customCategory ? editTx.customCategory : ''
+      );
+      const [note, setNote] = useState(editTx ? (editTx.note || '') : '');
+      const [date, setDate] = useState(editTx ? editTx.date : todayStr());
 
+      const isEditing = !!editTx;
       const cats = type === 'expense' ? EXPENSE_CATS : INCOME_CATS;
+      const isCustom = category === 'other-exp' || category === 'other-inc';
+
+      // Reset category when type changes (unless editing)
+      useEffect(() => {
+        if (!isEditing) {
+          setCategory(type === 'expense' ? 'food' : 'salary');
+          setCustomCategory('');
+        }
+      }, [type, isEditing]);
 
       function handleSubmit(e) {
         e.preventDefault();
@@ -799,21 +1128,69 @@
           showToast('请输入金额');
           return;
         }
-        onAdd({ type, amount: val, category, note, date });
-        setAmount('');
-        setNote('');
-        showToast(type === 'expense' ? '支出已记录' : '收入已记录');
+        if (isCustom && !customCategory.trim()) {
+          showToast('请输入自定义分类名称');
+          return;
+        }
+        const txData = {
+          type,
+          amount: val,
+          category,
+          note,
+          date,
+          ...(isCustom && customCategory.trim() ? { customCategory: customCategory.trim() } : {}),
+        };
+        if (isEditing) {
+          onUpdate({ ...editTx, ...txData });
+          showToast('记录已更新');
+        } else {
+          onAdd(txData);
+          setAmount('');
+          setNote('');
+          setCustomCategory('');
+          showToast(type === 'expense' ? '支出已记录' : '收入已记录');
+        }
+      }
+
+      function handleCancel() {
+        if (isEditing) {
+          onCancelEdit();
+        } else {
+          setAmount('');
+          setNote('');
+          setCustomCategory('');
+        }
       }
 
       return (
         <form onSubmit={handleSubmit}>
+          {isEditing && (
+            <div style={{
+              background: 'color-mix(in oklab, var(--accent), transparent 90%)',
+              borderRadius: 'var(--radius-md)',
+              padding: '8px 14px',
+              marginBottom: 16,
+              fontSize: 13,
+              color: 'var(--accent)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <span>正在编辑记录</span>
+              <button type="button" onClick={handleCancel}
+                style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
+                取消
+              </button>
+            </div>
+          )}
+
           <div className="type-toggle">
             <button type="button" className={`type-btn ${type === 'expense' ? 'active expense-active' : ''}`}
-              onClick={() => { setType('expense'); setCategory('food'); }}>
+              onClick={() => { setType('expense'); if (!isEditing) { setCategory('food'); setCustomCategory(''); } }}>
               支出
             </button>
             <button type="button" className={`type-btn ${type === 'income' ? 'active income-active' : ''}`}
-              onClick={() => { setType('income'); setCategory('salary'); }}>
+              onClick={() => { setType('income'); if (!isEditing) { setCategory('salary'); setCustomCategory(''); } }}>
               收入
             </button>
           </div>
@@ -842,12 +1219,28 @@
                   role="radio"
                   aria-checked={category === c.id}
                   className={`cat-btn ${category === c.id ? 'active' : ''}`}
-                  onClick={() => setCategory(c.id)}>
+                  onClick={() => {
+                    setCategory(c.id);
+                    if (c.id !== 'other-exp' && c.id !== 'other-inc') {
+                      setCustomCategory('');
+                    }
+                  }}>
                   <span className="cat-icon" aria-hidden="true">{c.icon}</span>
                   {c.label}
                 </button>
               ))}
             </div>
+            {isCustom && (
+              <input
+                type="text"
+                className="custom-cat-input"
+                placeholder="输入自定义分类名称…"
+                value={customCategory}
+                onChange={e => setCustomCategory(e.target.value)}
+                maxLength={10}
+                autoFocus
+              />
+            )}
           </div>
 
           <div className="form-group">
@@ -862,8 +1255,13 @@
           </div>
 
           <button type="submit" className="submit-btn">
-            {type === 'expense' ? '记录支出' : '记录收入'}
+            {isEditing ? '更新记录' : type === 'expense' ? '记录支出' : '记录收入'}
           </button>
+          {isEditing && (
+            <button type="button" className="cancel-edit-btn" onClick={handleCancel}>
+              取消编辑
+            </button>
+          )}
         </form>
       );
     }
@@ -884,20 +1282,30 @@
       const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
       const count = monthTx.length;
 
-      // Category breakdown for expenses
-      const catBreakdown = useMemo(() => {
+      // Category breakdown for expenses (for pie chart)
+      const expBreakdown = useMemo(() => {
         const map = {};
         monthTx.filter(t => t.type === 'expense').forEach(t => {
-          map[t.category] = (map[t.category] || 0) + t.amount;
+          const label = catDisplay(t);
+          const key = t.customCategory ? t.customCategory : t.category;
+          if (!map[key]) map[key] = { id: key, label, amount: 0 };
+          map[key].amount += t.amount;
         });
-        return Object.entries(map)
-          .map(([id, amount]) => ({ ...CAT_MAP[id], amount }))
-          .sort((a, b) => b.amount - a.amount);
+        return Object.values(map).sort((a, b) => b.amount - a.amount);
       }, [monthTx]);
 
-      const maxCatAmount = catBreakdown.length > 0 ? catBreakdown[0].amount : 1;
+      // Income breakdown (for pie chart)
+      const incBreakdown = useMemo(() => {
+        const map = {};
+        monthTx.filter(t => t.type === 'income').forEach(t => {
+          const label = catDisplay(t);
+          const key = t.customCategory ? t.customCategory : t.category;
+          if (!map[key]) map[key] = { id: key, label, amount: 0 };
+          map[key].amount += t.amount;
+        });
+        return Object.values(map).sort((a, b) => b.amount - a.amount);
+      }, [monthTx]);
 
-      // Navigate months
       function shiftMonth(delta) {
         const [y, m] = viewMonth.split('-').map(Number);
         const d = new Date(y, m - 1 + delta, 1);
@@ -932,26 +1340,20 @@
           </div>
 
           <div className="section-title">支出分类</div>
-          {catBreakdown.length === 0 ? (
+          {expBreakdown.length === 0 ? (
             <div className="empty">
               <div className="empty-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 40V20"/><path d="M18 40V10"/><path d="M28 40V16"/><path d="M38 40V6"/></svg></div>
               <div className="empty-text">本月暂无支出记录</div>
             </div>
           ) : (
-            <div className="card" style={{ padding: '4px 20px' }}>
-              {catBreakdown.map(cat => (
-                <div className="cat-bar-row" key={cat.id}>
-                  <div className="cat-bar-icon">{cat.icon}</div>
-                  <div className="cat-bar-info">
-                    <div className="cat-bar-name">{cat.label}</div>
-                    <div className="cat-bar-track">
-                      <div className="cat-bar-fill" style={{ width: `${(cat.amount / maxCatAmount) * 100}%` }} />
-                    </div>
-                  </div>
-                  <div className="cat-bar-amount">¥{fmt(cat.amount)}</div>
-                </div>
-              ))}
-            </div>
+            <DonutChart data={expBreakdown} total={expense} colors={CAT_COLORS} centerLabel="总支出" />
+          )}
+
+          {incBreakdown.length > 0 && (
+            <>
+              <div className="section-title">收入分类</div>
+              <DonutChart data={incBreakdown} total={income} colors={INC_COLORS} centerLabel="总收入" />
+            </>
           )}
         </div>
       );
@@ -992,18 +1394,29 @@
 
       const maxMonthExpense = Math.max(...monthBreakdown.map(m => m.expense), 1);
 
-      // Category breakdown for the year
-      const catBreakdown = useMemo(() => {
+      // Category breakdown for expenses (pie chart)
+      const expBreakdown = useMemo(() => {
         const map = {};
         yearTx.filter(t => t.type === 'expense').forEach(t => {
-          map[t.category] = (map[t.category] || 0) + t.amount;
+          const label = catDisplay(t);
+          const key = t.customCategory ? t.customCategory : t.category;
+          if (!map[key]) map[key] = { id: key, label, amount: 0 };
+          map[key].amount += t.amount;
         });
-        return Object.entries(map)
-          .map(([id, amount]) => ({ ...CAT_MAP[id], amount }))
-          .sort((a, b) => b.amount - a.amount);
+        return Object.values(map).sort((a, b) => b.amount - a.amount);
       }, [yearTx]);
 
-      const maxCatAmount = catBreakdown.length > 0 ? catBreakdown[0].amount : 1;
+      // Income breakdown (pie chart)
+      const incBreakdown = useMemo(() => {
+        const map = {};
+        yearTx.filter(t => t.type === 'income').forEach(t => {
+          const label = catDisplay(t);
+          const key = t.customCategory ? t.customCategory : t.category;
+          if (!map[key]) map[key] = { id: key, label, amount: 0 };
+          map[key].amount += t.amount;
+        });
+        return Object.values(map).sort((a, b) => b.amount - a.amount);
+      }, [yearTx]);
 
       const activeMonths = monthBreakdown.filter(m => m.count > 0);
 
@@ -1063,26 +1476,20 @@
           )}
 
           <div className="section-title">年度支出分类</div>
-          {catBreakdown.length === 0 ? (
+          {expBreakdown.length === 0 ? (
             <div className="empty">
               <div className="empty-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 40V20"/><path d="M18 40V10"/><path d="M28 40V16"/><path d="M38 40V6"/></svg></div>
               <div className="empty-text">暂无支出记录</div>
             </div>
           ) : (
-            <div className="card" style={{ padding: '4px 20px' }}>
-              {catBreakdown.map(cat => (
-                <div className="cat-bar-row" key={cat.id}>
-                  <div className="cat-bar-icon">{cat.icon}</div>
-                  <div className="cat-bar-info">
-                    <div className="cat-bar-name">{cat.label}</div>
-                    <div className="cat-bar-track">
-                      <div className="cat-bar-fill" style={{ width: `${(cat.amount / maxCatAmount) * 100}%` }} />
-                    </div>
-                  </div>
-                  <div className="cat-bar-amount">¥{fmt(cat.amount)}</div>
-                </div>
-              ))}
-            </div>
+            <DonutChart data={expBreakdown} total={expense} colors={CAT_COLORS} centerLabel="总支出" />
+          )}
+
+          {incBreakdown.length > 0 && (
+            <>
+              <div className="section-title">年度收入分类</div>
+              <DonutChart data={incBreakdown} total={income} colors={INC_COLORS} centerLabel="总收入" />
+            </>
           )}
         </div>
       );
@@ -1092,6 +1499,7 @@
     function App() {
       const [tab, setTab] = useState('overview');
       const [transactions, setTransactions] = useState(loadTx);
+      const [editingTx, setEditingTx] = useState(null);
 
       useEffect(() => { saveTx(transactions); }, [transactions]);
 
@@ -1099,9 +1507,25 @@
         setTransactions(prev => [...prev, { ...tx, id: Date.now() }]);
       }, []);
 
+      const updateTx = useCallback((updatedTx) => {
+        setTransactions(prev => prev.map(t => t.id === updatedTx.id ? updatedTx : t));
+        setEditingTx(null);
+        setTab('overview');
+      }, []);
+
       const deleteTx = useCallback((id) => {
         setTransactions(prev => prev.filter(t => t.id !== id));
         showToast('已删除');
+      }, []);
+
+      const handleEdit = useCallback((tx) => {
+        setEditingTx(tx);
+        setTab('record');
+      }, []);
+
+      const handleCancelEdit = useCallback(() => {
+        setEditingTx(null);
+        setTab('overview');
       }, []);
 
       const headerTitles = { overview: '记账本', record: '记一笔', summary: '月度', yearly: '年度' };
@@ -1115,10 +1539,15 @@
 
           <div className="content">
             <div role="tabpanel" className={`page ${tab === 'overview' ? 'active' : ''}`}>
-              <OverviewPage transactions={transactions} onDelete={deleteTx} />
+              <OverviewPage transactions={transactions} onEdit={handleEdit} onDelete={deleteTx} />
             </div>
             <div role="tabpanel" className={`page ${tab === 'record' ? 'active' : ''}`}>
-              <RecordPage onAdd={addTx} />
+              <RecordPage
+                editTx={editingTx}
+                onAdd={addTx}
+                onUpdate={updateTx}
+                onCancelEdit={handleCancelEdit}
+              />
             </div>
             <div role="tabpanel" className={`page ${tab === 'summary' ? 'active' : ''}`}>
               <SummaryPage transactions={transactions} />
@@ -1129,7 +1558,7 @@
           </div>
 
           <nav className="tab-bar" role="tablist" aria-label="主导航">
-            <button role="tab" aria-selected={tab === 'overview'} className={`tab-item ${tab === 'overview' ? 'active' : ''}`} onClick={() => setTab('overview')}>
+            <button role="tab" aria-selected={tab === 'overview'} className={`tab-item ${tab === 'overview' ? 'active' : ''}`} onClick={() => { setTab('overview'); setEditingTx(null); }}>
               <IconOverview active={tab === 'overview'} />
               <span>概览</span>
             </button>
@@ -1137,11 +1566,11 @@
               <IconRecord active={tab === 'record'} />
               <span>记账</span>
             </button>
-            <button role="tab" aria-selected={tab === 'summary'} className={`tab-item ${tab === 'summary' ? 'active' : ''}`} onClick={() => setTab('summary')}>
+            <button role="tab" aria-selected={tab === 'summary'} className={`tab-item ${tab === 'summary' ? 'active' : ''}`} onClick={() => { setTab('summary'); setEditingTx(null); }}>
               <IconSummary active={tab === 'summary'} />
               <span>月度</span>
             </button>
-            <button role="tab" aria-selected={tab === 'yearly'} className={`tab-item ${tab === 'yearly' ? 'active' : ''}`} onClick={() => setTab('yearly')}>
+            <button role="tab" aria-selected={tab === 'yearly'} className={`tab-item ${tab === 'yearly' ? 'active' : ''}`} onClick={() => { setTab('yearly'); setEditingTx(null); }}>
               <IconYear active={tab === 'yearly'} />
               <span>年度</span>
             </button>
